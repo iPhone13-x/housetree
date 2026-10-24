@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Family Chat · পরিবার চ্যাট</title>
+<style>
+:root{--bg:#e0f2fe;--panel:#f0f9ff;--hd:#0ea5e9;--hdt:#fff;--me:#bae6fd;--ot:#fff;--tx:#0c2a3d;--sub:#5b7a8c;--bd:#bfdcee;--ac:#0284c7;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#071a26;--panel:#0d2a3d;--hd:#0b3a57;--hdt:#e6f4fb;--me:#0c5a85;--ot:#0d2a3d;--tx:#e6f4fb;--sub:#8fb3c8;--bd:#17435e;--ac:#38bdf8;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#071a26;--panel:#0d2a3d;--hd:#0b3a57;--hdt:#e6f4fb;--me:#0c5a85;--ot:#0d2a3d;--tx:#e6f4fb;--sub:#8fb3c8;--bd:#17435e;--ac:#38bdf8;color-scheme:dark}
+html,body{height:100%;margin:0}
+body{background:var(--bg);color:var(--tx);font-family:system-ui,-apple-system,"Noto Sans Bengali","Segoe UI",sans-serif;display:flex;flex-direction:column;max-width:720px;margin:0 auto}
+header{background:var(--hd);color:var(--hdt);display:flex;align-items:center;gap:8px;padding:10px 12px}
+header b{flex:1;font-size:17px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+header button{background:none;color:inherit;width:auto;height:auto;padding:6px 8px;font-size:18px;border-radius:8px}
+a.call{color:inherit;text-decoration:none;font-size:20px;padding:4px 6px}
+main{flex:1;overflow-y:auto;display:flex;flex-direction:column}
+.pad{padding:16px;display:flex;flex-direction:column;gap:10px}
+.row{display:flex;gap:10px;align-items:center;padding:11px 14px;border-bottom:1px solid var(--bd);cursor:pointer;background:var(--panel)}
+.av{width:42px;height:42px;border-radius:50%;background:var(--hd);color:var(--hdt);display:grid;place-items:center;font-weight:700;flex:none}
+.row div{min-width:0}.row b,.row small{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.row small{color:var(--sub)}
+#msgs{padding:10px;gap:6px}
+.m{max-width:80%;padding:7px 10px;border-radius:10px;background:var(--ot);box-shadow:0 1px 1px rgba(0,0,0,.12);align-self:flex-start;word-wrap:break-word;white-space:pre-wrap}
+.m.me{background:var(--me);align-self:flex-end}
+.n{font-size:12px;font-weight:600;color:var(--ac);margin-bottom:2px}.tm{font-size:11px;color:var(--sub);text-align:right;margin-top:2px}
+.m img,.m video{max-width:100%;border-radius:8px;display:block}
+[hidden]{display:none!important}
+.bar{background:var(--panel);display:flex;gap:6px;padding:8px;align-items:center}
+input,select,textarea{border:1px solid var(--bd);background:var(--ot);color:var(--tx);border-radius:10px;padding:11px 14px;font-size:16px;outline:none;font-family:inherit}
+.bar input[type=text]{flex:1;border-radius:22px}
+button{border:0;background:var(--hd);color:var(--hdt);min-width:42px;height:42px;border-radius:50%;font-size:17px;cursor:pointer;padding:0 12px}
+button.w{border-radius:10px;font-size:16px}
+.fab{position:sticky;bottom:12px;align-self:flex-end;margin:12px;width:54px;height:54px;font-size:24px;box-shadow:0 2px 8px rgba(0,0,0,.3)}
+.sub{color:var(--sub);font-size:13px}.err{color:#e11d48;font-size:13px}
+table{border-collapse:collapse;font-size:13px}td,th{border:1px solid var(--bd);padding:5px 8px;text-align:left}.sc{overflow-x:auto}
+.empty{margin:auto;color:var(--sub);text-align:center;padding:24px}
+</style>
+</head>
+<body>
+<header id="hd"><b id="ttl"></b></header>
+<main id="mn"><div class="empty" id="ld">…</div></main>
+<div class="bar" id="bar" hidden>
+  <button id="att" aria-label="media">📎</button>
+  <input type="text" id="in" autocomplete="off">
+  <button id="snd" aria-label="send">➤</button>
+  <input type="file" id="fl" accept="image/*,video/*" hidden>
+</div>
+<script>
+(function(){
+var TX={bn:{app:"পরিবার চ্যাট",wait:"সংযুক্ত হচ্ছে…",noacc:"এই পেজ ব্যবহার করতে ইমেইল দিয়ে সাইন-ইন করা দরকার। আমন্ত্রণ লিংক দিয়ে ঢুকুন।",wel:"স্বাগতম! আপনার তথ্য দিন",em:"ইমেইল",nick:"ডাকনাম",gen:"লিঙ্গ",male:"পুরুষ",female:"নারী",other:"অন্যান্য",age:"বয়স",save:"সংরক্ষণ করুন",need:"সব ঘর পূরণ করুন",chats:"চ্যাট",none:"কোনো চ্যাট নেই। ➕ চেপে শুরু করুন",newc:"নতুন চ্যাট",pick:"একজন বাছলে ব্যক্তিগত চ্যাট, একাধিক বাছলে গ্রুপ",gname:"গ্রুপের নাম",start:"শুরু করুন",msg:"মেসেজ লিখুন…",back:"← ফিরে যান",big:"ফাইল ২০MB এর বেশি",fail:"পাঠানো যায়নি",grp:"গ্রুপ",adm:"সদস্য তথ্য (শুধু আপনি দেখতে পাবেন)",dl:"CSV ডাউনলোড",nomem:"আর কেউ যোগ হয়নি",photo:"📷 ছবি",video:"🎥 ভিডিও",share:"শেয়ার",copy:"লিংক কপি / শেয়ার করুন",copied:"কপি হয়েছে ✓",sharenote:"এই লিংক পরিবারকে পাঠান। তবে মেসেজ লিখতে হলে পেজের নিজস্ব Share মেনু থেকে তাদের ইমেইল Contributor হিসেবে যোগ করতে হবে।"},
+en:{app:"Family Chat",wait:"Connecting…",noacc:"You need to sign in with your email to use this page. Open it via your invite link.",wel:"Welcome! Set up your profile",em:"Email",nick:"Nickname",gen:"Gender",male:"Male",female:"Female",other:"Other",age:"Age",save:"Save",need:"Please fill every field",chats:"Chats",none:"No chats yet. Tap ➕ to start",newc:"New chat",pick:"Pick one for a private chat, several for a group",gname:"Group name",start:"Start",msg:"Type a message…",back:"← Back",big:"File is over 20MB",fail:"Could not send",grp:"Group",adm:"Member info (only you can see this)",dl:"Download CSV",nomem:"No one else has joined yet",photo:"📷 Photo",video:"🎥 Video",share:"Share",copy:"Copy / share link",copied:"Copied ✓",sharenote:"Send this link to your family. To let them write messages, also add their email as Contributor from the page's own Share menu."}};
+var L="bn";try{L=localStorage.getItem("lang")||"bn"}catch(e){}
+function t(k){return TX[L][k]}
+var $=function(i){return document.getElementById(i)},mn=$("mn"),hd=$("hd"),bar=$("bar"),inp=$("in");
+var db,user,assets,myId,myEmail,isOwner=false,users={},chats=[],cur=null,unM=null,view="list";
+function el(tag,cls,txt){var e=document.createElement(tag);if(cls)e.className=cls;if(txt!=null)e.textContent=txt;return e}
+function nm(id){return(users[id]&&users[id].nick)||"?"}
+function cname(c){if(c.type==="group")return c.name||t("grp");var o=(c.members||[]).filter(function(x){return x!==myId})[0];return nm(o)}
+function head(title,back,extra){hd.textContent="";if(back){var b=el("button",null,"←");b.onclick=back;hd.appendChild(b)}hd.appendChild(el("b",null,title));
+ if(extra)extra.forEach(function(x){hd.appendChild(x)});
+ var lg=el("button",null,L==="bn"?"EN":"বাং");lg.onclick=function(){L=L==="bn"?"en":"bn";try{localStorage.setItem("lang",L)}catch(e){}go(view)};hd.appendChild(lg)}
+function go(v){view=v;bar.hidden=v!=="chat";inp.placeholder=t("msg");
+ if(v==="list")showList();else if(v==="new")showNew();else if(v==="admin")showAdmin();else if(v==="chat")showChat();else if(v==="setup")showSetup();else if(v==="share")showShare()}
+/* setup */
+function showSetup(){head(t("app"));mn.textContent="";var p=el("div","pad");p.appendChild(el("h3",null,t("wel")));
+ var em=el("input");em.type="email";em.placeholder=t("em");em.value=myEmail||"";
+ var n=el("input");n.placeholder=t("nick");n.maxLength=30;
+ var g=el("select");[["","— "+t("gen")+" —"],["male",t("male")],["female",t("female")],["other",t("other")]].forEach(function(o){var op=el("option",null,o[1]);op.value=o[0];g.appendChild(op)});
+ var a=el("input");a.type="number";a.placeholder=t("age");a.min=1;a.max=120;
+ var er=el("div","err"),s=el("button","w",t("save"));
+ s.onclick=async function(){var nick=n.value.trim(),age=parseInt(a.value,10);var mail=em.value.trim();if(!mail||!nick||!g.value||!age){er.textContent=t("need");return}
+  try{await db.doc("private/"+myId).set({email:mail,nick:nick,gender:g.value,age:age,ts:Date.now()});
+   await db.doc("users/"+myId).set({nick:nick,ts:Date.now()});users[myId]={nick:nick};go("list")}catch(e){er.textContent=t("fail")}};
+ [em,n,g,a,s,er].forEach(function(x){p.appendChild(x)});mn.appendChild(p)}
+function showShare(){head(t("share"),function(){go("list")});mn.textContent="";var p=el("div","pad"),u="https://claude.ai/artifact/RnYM9kJwVVN6ZQwMMApyEy",i=el("input");i.value=u;i.readOnly=true;
+ var b=el("button","w",t("copy"));b.onclick=async function(){try{if(navigator.share){await navigator.share({title:t("app"),url:u})}else{await navigator.clipboard.writeText(u);b.textContent=t("copied")}}catch(e){i.select()}};
+ p.appendChild(el("div","sub",t("sharenote")));p.appendChild(i);p.appendChild(b);mn.appendChild(p)}
+/* list */
+function ib(i,v){var b=el("button",null,i);b.onclick=function(){go(v)};return b}
+function showList(){var ex=[ib("✉","new"),ib("🔗","share")];if(isOwner)ex.push(ib("🗂","admin"));head(t("chats"),null,ex);
+ mn.textContent="";if(!chats.length)mn.appendChild(el("div","empty",t("none")));
+ chats.slice().sort(function(a,b){return(b.ts||0)-(a.ts||0)}).forEach(function(c){var r=el("div","row"),n=cname(c);
+  r.appendChild(el("div","av",c.type==="group"?"👥":n.charAt(0).toUpperCase()));var d=el("div");d.appendChild(el("b",null,n));d.appendChild(el("small",null,c.last||""));r.appendChild(d);
+  r.onclick=function(){cur=c;go("chat")};mn.appendChild(r)});
+ var f=el("button","fab","➕");f.onclick=function(){go("new")};mn.appendChild(f)}
+/* new chat */
+function showNew(){head(t("newc"),function(){go("list")});mn.textContent="";var sel={},p=el("div","pad");p.appendChild(el("div","sub",t("pick")));
+ var gn=el("input");gn.placeholder=t("gname");gn.hidden=true;p.appendChild(gn);mn.appendChild(p);
+ var ids=Object.keys(users).filter(function(i){return i!==myId});if(!ids.length)p.appendChild(el("div","sub",t("nomem")));
+ ids.forEach(function(i){var r=el("label","row"),cb=el("input");cb.type="checkbox";cb.onchange=function(){sel[i]=cb.checked;gn.hidden=Object.keys(sel).filter(function(k){return sel[k]}).length<2};
+  r.appendChild(cb);r.appendChild(el("div","av",nm(i).charAt(0).toUpperCase()));r.appendChild(el("b",null,nm(i)));mn.appendChild(r)});
+ var go2=el("button","w",t("start"));go2.style.margin="12px";go2.onclick=async function(){var m=Object.keys(sel).filter(function(k){return sel[k]});if(!m.length)return;
+  var c;try{if(m.length===1){var id="dm_"+[myId,m[0]].sort().join("__").replace(/[^A-Za-z0-9_\-.~:@+]/g,"~");c={id:id,type:"dm",members:[myId,m[0]],ts:Date.now(),last:""};
+   var ex=chats.filter(function(x){return x.id===id})[0];if(ex)c=ex;else await db.doc("chats/"+id).set(c)}
+  else{var d=await db.collection("chats").add({type:"group",name:gn.value.trim()||m.map(nm).join(", ").slice(0,40),members:[myId].concat(m),ts:Date.now(),last:""});c={id:d.id,type:"group",name:gn.value.trim()||t("grp"),members:[myId].concat(m)}}
+  cur=c;go("chat")}catch(e){alert(t("fail"))}};mn.appendChild(go2)}
+/* chat */
+function showChat(){var call=el("a","call","📞"),vc=el("a","call","🎥"),room="FamilyChatBD-"+cur.id.replace(/[^A-Za-z0-9]/g,"").slice(-24);
+ call.href="https://meet.jit.si/"+room+"#config.startWithVideoMuted=true";vc.href="https://meet.jit.si/"+room;[call,vc].forEach(function(a){a.target="_blank";a.rel="noopener"});
+ head(cname(cur),function(){if(unM){unM();unM=null}go("list")},[call,vc]);mn.textContent="";var box=el("div","pad");box.id="msgs";mn.appendChild(box);
+ if(unM)unM();
+ unM=db.collection("chats/"+cur.id+"/messages").orderBy("ts").limit(200).onSnapshot(function(s){box.textContent="";
+  s.docs.forEach(function(x){var d=x.data()||{},me=d.uid===myId,m=el("div","m"+(me?" me":""));
+   if(!me&&cur.type==="group")m.appendChild(el("div","n",nm(d.uid)));
+   if(d.kind==="image"){var im=el("img");im.src="/_blob/"+d.aid;im.loading="lazy";m.appendChild(im)}
+   else if(d.kind==="video"){var v=el("video");v.src="/_blob/"+d.aid;v.controls=true;v.preload="metadata";m.appendChild(v)}
+   else m.appendChild(el("div",null,String(d.text||"")));
+   m.appendChild(el("div","tm",new Date(d.ts||0).toLocaleTimeString(L==="bn"?"bn-BD":"en-US",{hour:"2-digit",minute:"2-digit"})));box.appendChild(m)});
+  mn.scrollTop=mn.scrollHeight})}
+async function post(o,last){if(!db||!cur)return;try{o.uid=myId;o.ts=Date.now();await db.collection("chats/"+cur.id+"/messages").add(o);await db.doc("chats/"+cur.id).update({ts:o.ts,last:last})}catch(e){alert(t("fail"))}}
+$("snd").onclick=function(){var v=inp.value.trim();if(!v)return;inp.value="";post({text:v.slice(0,2000)},v.slice(0,40))};
+inp.addEventListener("keydown",function(e){if(e.key==="Enter"){e.preventDefault();$("snd").onclick()}});
+$("att").onclick=function(){if(assets)$("fl").click()};
+function shrink(f){return new Promise(function(ok,no){var u=URL.createObjectURL(f),i=new Image();i.onload=function(){var r=Math.min(1,1280/Math.max(i.width,i.height)),c=document.createElement("canvas");c.width=i.width*r;c.height=i.height*r;c.getContext("2d").drawImage(i,0,0,c.width,c.height);c.toBlob(function(b){b?ok(b):no()},"image/jpeg",.82)};i.onerror=no;i.src=u})}
+$("fl").onchange=async function(e){var f=e.target.files[0];e.target.value="";if(!f)return;
+ try{var isV=f.type.indexOf("video")===0,b=f;if(!isV)b=await shrink(f);if(b.size>20*1024*1024){alert(t("big"));return}
+  var r=await assets.upload(b);await post({kind:isV?"video":"image",aid:r.id},isV?t("video"):t("photo"))}catch(x){alert(t("fail"))}};
+/* admin (owner only) */
+async function showAdmin(){head(t("adm"),function(){go("list")});mn.textContent="";var p=el("div","pad");mn.appendChild(p);
+ try{var s=await db.collection("private").get(),rows=s.docs.map(function(x){return x.data()||{}}),sc=el("div","sc"),tb=el("table"),h=el("tr");
+  [t("em"),t("nick"),t("gen"),t("age")].forEach(function(x){h.appendChild(el("th",null,x))});tb.appendChild(h);
+  rows.forEach(function(d){var r=el("tr");[d.email,d.nick,d.gender,d.age].forEach(function(x){r.appendChild(el("td",null,x==null?"":String(x)))});tb.appendChild(r)});sc.appendChild(tb);p.appendChild(sc);
+  var b=el("button","w",t("dl"));b.onclick=async function(){try{var dl=await claude.use("downloads");if(!dl)return;
+   var q=function(x){return'"'+String(x==null?"":x).replace(/"/g,'""')+'"'};
+   await dl.save({filename:"family-members.csv",data:"email,nickname,gender,age\n"+rows.map(function(d){return[d.email,d.nick,d.gender,d.age].map(q).join(",")}).join("\n")})}catch(e){}};p.appendChild(b)}
+ catch(e){p.appendChild(el("div","err",t("fail")))}}
+/* boot */
+(async function(){head(t("app"));
+ try{db=await claude.use("db");user=await claude.use("user");assets=await claude.use("assets")}catch(e){}
+ if(!db||!user){mn.textContent="";mn.appendChild(el("div","empty",t("noacc")));return}
+ var v=await user.me();myId=await user.id();myEmail=v&&v.email;isOwner=user.isOwner();if(!assets)$("att").hidden=true;
+ db.collection("users").onSnapshot(function(s){s.docs.forEach(function(x){users[x.id]=x.data()});if(view==="list")showList()});
+ var mine=await db.doc("users/"+myId).get();
+ db.collection("chats").where("members","array-contains",myId).onSnapshot(function(s){chats=s.docs.map(function(x){var d=x.data();d.id=x.id;return d});if(view==="list")showList()});
+ if(mine.exists){users[myId]=mine.data();go("list")}else go("setup")})();
+})();
+</script>
+</body>
+</html>
